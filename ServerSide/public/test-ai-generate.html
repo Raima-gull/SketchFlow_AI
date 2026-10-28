@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SketchFlow — AI Generate Test</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0B1020;
+    color: #F8FAFC;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #17112E;
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #A855F7, #22D3EE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .section { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 13px;
+    color: #C4B5FD;
+    margin-bottom: 6px;
+  }
+  textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: #0B1020;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 8px;
+    color: #F8FAFC;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    min-height: 80px;
+    resize: vertical;
+  }
+  textarea:focus { border-color: #A855F7; }
+  button {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .result {
+    margin-top: 20px;
+    padding: 16px;
+    background: #0B1020;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #C4B5FD;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  .images { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .images img, .images video { width: 100%; border-radius: 8px; border: 1px solid rgba(124, 58, 237, 0.3); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎨 SketchFlow — AI Generate Test</h1>
+
+  <div class="section">
+    <label>Prompt</label>
+    <textarea id="prompt">Create a landing page for an AI startup with hero section, features, pricing, testimonials, and contact form</textarea>
+  </div>
+
+  <div style="margin-bottom: 20px;">
+    <button id="loginBtn">1. Login</button>
+    <button id="genTextBtn" disabled>2. Generate Text</button>
+    <button id="genImageBtn" disabled>3. Generate Image</button>
+    <button id="genVideoBtn" disabled>4. Generate Video</button>
+  </div>
+
+  <div class="result" id="result">Ready. Click "1. Login" to start.</div>
+  <div class="images" id="images"></div>
+</div>
+
+<script>
+  var API = 'http://localhost:5000';
+  var resultEl = document.getElementById('result');
+  var imagesEl = document.getElementById('images');
+
+  function show(msg) { resultEl.textContent = msg; }
+  function enableButtons() {
+    document.getElementById('genTextBtn').disabled = false;
+    document.getElementById('genImageBtn').disabled = false;
+    document.getElementById('genVideoBtn').disabled = false;
+  }
+
+  // ===== LOGIN =====
+  document.getElementById('loginBtn').addEventListener('click', function () {
+    show('Logging in...');
+    fetch(API + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          show('✅ Login OK: ' + d.data.user.name + '\n\nAb koi generate button dabao.');
+          enableButtons();
+        } else {
+          show('❌ Login failed:\n' + JSON.stringify(d, null, 2));
+        }
+      })
+      .catch(function (e) { show('❌ ' + e.message); });
+  });
+
+  // ===== TEXT (GROQ) =====
+  document.getElementById('genTextBtn').addEventListener('click', function () {
+    var prompt = document.getElementById('prompt').value;
+    if (prompt.length < 5) {
+      show('❌ Prompt bahut chhota hai — kam se kam 5 characters likho');
+      return;
+    }
+    show('Generating website JSON with Groq... (10-30 sec)');
+    fetch(API + '/api/ai/text/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ prompt: prompt }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { show(JSON.stringify(d, null, 2)); })
+      .catch(function (e) { show('❌ ' + e.message); });
+  });
+
+  // ===== IMAGE (MAGIC HOUR) =====
+  document.getElementById('genImageBtn').addEventListener('click', function () {
+    var prompt = document.getElementById('prompt').value;
+    if (prompt.length < 3) {
+      show('❌ Prompt bahut chhota hai');
+      return;
+    }
+    show('Submitting image job with Magic Hour...');
+    imagesEl.innerHTML = '';
+
+    fetch(API + '/api/ai/image/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ prompt: prompt, provider: 'magic-hour' }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        show(JSON.stringify(d, null, 2));
+        if (d.success && d.data.generation && d.data.generation._id) {
+          pollImage(d.data.generation._id);
+        }
+      })
+      .catch(function (e) { show('❌ ' + e.message); });
+  });
+
+  function pollImage(id) {
+    var interval = setInterval(function () {
+      fetch(API + '/api/ai/image/' + id + '/status', { credentials: 'include' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var gen = d.data.generation;
+          show('Image status: ' + gen.status + '\n\n' + JSON.stringify(d, null, 2));
+          if (gen.status === 'completed') {
+            clearInterval(interval);
+            if (d.data.media && d.data.media.length > 0) {
+              d.data.media.forEach(function (m) {
+                imagesEl.innerHTML += '<img src="' + API + m.url + '" />';
+              });
+            }
+          } else if (gen.status === 'failed') {
+            clearInterval(interval);
+          }
+        })
+        .catch(function (e) { show('❌ ' + e.message); });
+    }, 5000);
+  }
+
+  // ===== VIDEO (MAGIC HOUR) =====
+  document.getElementById('genVideoBtn').addEventListener('click', function () {
+    var prompt = document.getElementById('prompt').value;
+    if (prompt.length < 3) {
+      show('❌ Prompt bahut chhota hai');
+      return;
+    }
+    show('Submitting video job with Magic Hour...');
+    imagesEl.innerHTML = '';
+
+    fetch(API + '/api/ai/video/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ prompt: prompt, provider: 'magic-hour' }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        show(JSON.stringify(d, null, 2));
+        if (d.success && d.data.generation) {
+          pollVideo(d.data.generation._id);
+        }
+      })
+      .catch(function (e) { show('❌ ' + e.message); });
+  });
+
+  function pollVideo(id) {
+    var interval = setInterval(function () {
+      fetch(API + '/api/ai/video/' + id + '/status', { credentials: 'include' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          var gen = d.data.generation;
+          show('Video status: ' + gen.status + '\n\n' + JSON.stringify(d, null, 2));
+          if (gen.status === 'completed') {
+            clearInterval(interval);
+            // Media fetch karo aur video dikhao
+            if (gen.resultMediaIds && gen.resultMediaIds.length > 0) {
+              fetch(API + '/api/media/' + gen.resultMediaIds[0], { credentials: 'include' })
+                .then(function (r) { return r.json(); })
+                .then(function (m) {
+                  if (m.success && m.data.media) {
+                    var url = API + m.data.media.url;
+                    var type = m.data.media.mimeType || 'video/mp4';
+                    imagesEl.innerHTML += '<video controls autoplay loop style="width:100%"><source src="' + url + '" type="' + type + '"></video>';
+                  }
+                });
+            }
+          } else if (gen.status === 'failed' || gen.status === 'cancelled') {
+            clearInterval(interval);
+          }
+        })
+        .catch(function (e) { show('❌ ' + e.message); });
+    }, 5000);
+  }
+</script>
+</body>
+</html>

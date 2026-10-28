@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SketchFlow AI Test</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0B1020;
+    color: #F8FAFC;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #17112E;
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #A855F7, #22D3EE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  button {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 12px;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .result {
+    margin-top: 16px;
+    padding: 16px;
+    background: #0B1020;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #C4B5FD;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🤖 SketchFlow AI Providers Test</h1>
+
+  <button id="loginBtn">1. Login</button>
+  <button id="checkBtn" disabled>2. Check AI Providers</button>
+
+  <div class="result" id="result">Ready. Click "1. Login" to start.</div>
+</div>
+
+<script>
+  var API = 'http://localhost:5000';
+  var resultEl = document.getElementById('result');
+  var checkBtn = document.getElementById('checkBtn');
+
+  function show(msg) {
+    resultEl.textContent = msg;
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', function () {
+    show('Logging in...');
+    fetch(API + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        email: 'test@example.com',
+        password: 'password123',
+      }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          show('✅ Login OK: ' + d.data.user.name + '\n\nAb "2. Check AI Providers" dabao.');
+          checkBtn.disabled = false;
+        } else {
+          show('❌ Login failed:\n' + JSON.stringify(d, null, 2));
+        }
+      })
+      .catch(function (e) { show('❌ ' + e.message); });
+  });
+
+  checkBtn.addEventListener('click', function () {
+    show('Checking providers...');
+    fetch(API + '/api/ai/providers', { credentials: 'include' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { show(JSON.stringify(d, null, 2)); })
+      .catch(function (e) { show('❌ ' + e.message); });
+  });
+</script>
+</body>
+</html>

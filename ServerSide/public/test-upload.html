@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SketchFlow Upload Test</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0B1020;
+    color: #F8FAFC;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    width: 100%;
+    max-width: 600px;
+    background: #17112E;
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    box-shadow: 0 10px 40px rgba(124, 58, 237, 0.2);
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #A855F7, #22D3EE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    color: #94A3B8;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .section { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 13px;
+    color: #C4B5FD;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    background: #0B1020;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 8px;
+    color: #F8FAFC;
+    font-size: 14px;
+    outline: none;
+  }
+  input:focus { border-color: #A855F7; }
+  input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    background: #0B1020;
+    border: 1px dashed rgba(124, 58, 237, 0.4);
+    border-radius: 8px;
+    color: #94A3B8;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .result {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .result.success {
+    background: rgba(34, 211, 238, 0.1);
+    border: 1px solid #22D3EE;
+    color: #22D3EE;
+    display: block;
+  }
+  .result.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #EF4444;
+    color: #FCA5A5;
+    display: block;
+  }
+  .preview { margin-top: 16px; text-align: center; }
+  .preview img {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(124, 58, 237, 0.3);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🚀 SketchFlow Upload Test</h1>
+  <p class="subtitle">Login karo, file select karo, upload karo.</p>
+
+  <div class="section">
+    <label>Email</label>
+    <input type="email" id="email" value="test@example.com" />
+  </div>
+
+  <div class="section">
+    <label>Password</label>
+    <input type="password" id="password" value="password123" />
+  </div>
+
+  <button id="loginBtn">1. Login</button>
+
+  <div class="section" style="margin-top: 20px;">
+    <label>Image/Video File</label>
+    <input type="file" id="fileInput" accept="image/*,video/*" />
+  </div>
+
+  <button id="uploadBtn" disabled>2. Upload</button>
+
+  <div class="result" id="result"></div>
+  <div class="preview" id="preview"></div>
+</div>
+
+<script>
+  var API = 'http://localhost:5000';
+  var emailEl = document.getElementById('email');
+  var passwordEl = document.getElementById('password');
+  var loginBtn = document.getElementById('loginBtn');
+  var uploadBtn = document.getElementById('uploadBtn');
+  var fileInput = document.getElementById('fileInput');
+  var resultEl = document.getElementById('result');
+  var previewEl = document.getElementById('preview');
+
+  function showResult(message, type) {
+    resultEl.textContent = message;
+    resultEl.className = 'result ' + (type || 'success');
+  }
+
+  loginBtn.addEventListener('click', function () {
+    var email = emailEl.value;
+    var password = passwordEl.value;
+    showResult('Logging in...', 'success');
+
+    fetch(API + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email: email, password: password }),
+    })
+      .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+      .then(function (r) {
+        if (!r.ok) {
+          showResult('❌ Login failed:\n' + JSON.stringify(r.data, null, 2), 'error');
+          return;
+        }
+        showResult('✅ Login successful!\nUser: ' + r.data.data.user.name, 'success');
+        uploadBtn.disabled = false;
+      })
+      .catch(function (err) {
+        showResult('❌ Error: ' + err.message, 'error');
+      });
+  });
+
+  uploadBtn.addEventListener('click', function () {
+    var file = fileInput.files[0];
+    if (!file) {
+      showResult('❌ Please select a file first', 'error');
+      return;
+    }
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    showResult('📤 Uploading ' + file.name + '...', 'success');
+
+    fetch(API + '/api/media/upload', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    })
+      .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+      .then(function (r) {
+        if (!r.ok) {
+          showResult('❌ Upload failed:\n' + JSON.stringify(r.data, null, 2), 'error');
+          return;
+        }
+        showResult('✅ Upload successful!\n\n' + JSON.stringify(r.data, null, 2), 'success');
+        if (r.data.data.media.type === 'image') {
+          previewEl.innerHTML = '<img src="' + API + r.data.data.media.url + '" alt="Uploaded" />';
+        }
+      })
+      .catch(function (err) {
+        showResult('❌ Error: ' + err.message, 'error');
+      });
+  });
+</script>
+</body>
+</html>

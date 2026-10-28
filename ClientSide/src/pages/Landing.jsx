@@ -198,7 +198,7 @@ export default function Landing() {
           </Link>
 
           {/* ✅ Navbar links font size barha aur font weight medium kiya */}
-          <div className="desktop-links" style={{ fontSize: '17px', fontWeight: '500' }}>
+          <div className="desktop-links" style={{ fontSize: '19px', fontWeight: '500' }}>
             <a href="#features">The workspace</a>
             <a href="#how-it-works">How it works</a>
             <a href="#pricing">Plans</a>

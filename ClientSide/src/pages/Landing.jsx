@@ -197,7 +197,8 @@ export default function Landing() {
             <span>SketchFlow<span className="wordmark-ai"> AI</span></span>
           </Link>
 
-          <div className="desktop-links">
+          {/* ✅ Navbar links font size barha aur font weight medium kiya */}
+          <div className="desktop-links" style={{ fontSize: '17px', fontWeight: '500' }}>
             <a href="#features">The workspace</a>
             <a href="#how-it-works">How it works</a>
             <a href="#pricing">Plans</a>
@@ -248,7 +249,6 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* 👇 Yahan Robot Visual laga diya hai */}
           <div className="hero-visual hero-enter-right flex items-center justify-center">
             <RobotVisual />
           </div>
@@ -356,8 +356,13 @@ export default function Landing() {
             {steps.map((step, index) => (
               <Reveal key={step.number} direction={index % 2 ? 'left' : 'right'} className="step-item">
                 <div className="step-top"><span>{step.number}</span><span className="step-connector" /></div>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
+                {/* ✅ Step items ko clean sans-serif font diya */}
+                <h3 style={{ fontFamily: 'Inter, system-ui, sans-serif', letterSpacing: '-0.02em' }}>
+                  {step.title}
+                </h3>
+                <p style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '15px', lineHeight: '1.6' }}>
+                  {step.text}
+                </p>
               </Reveal>
             ))}
           </div>
@@ -384,7 +389,12 @@ export default function Landing() {
               <div className="plan-topline"><span>PLAN / {String(index + 1).padStart(2, '0')}</span><span>{plan.name.toUpperCase()}</span></div>
               <h3>{plan.name}</h3>
               <p className="plan-detail">{plan.detail}</p>
-              <div className="plan-callout">{plan.callout}<ArrowRight size={15} /></div>
+              
+              {/* ✅ Start free text ko bold aur italic kiya */}
+              <div className="plan-callout" style={{ fontStyle: 'italic', fontWeight: '800', fontFamily: 'Inter, system-ui, sans-serif', letterSpacing: '-0.01em' }}>
+                {plan.callout}<ArrowRight size={15} />
+              </div>
+              
               <div className="plan-divider" />
               <ul>{plan.features.map((item) => <li key={item}><Check size={15} />{item}</li>)}</ul>
               <a className={`plan-button ${plan.popular ? 'plan-button-dark' : ''}`} href="#faq">Explore {plan.name} <ArrowRight size={15} /></a>

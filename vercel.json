@@ -1,0 +1,17 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "services": {
+      "clientside": {
+        "root": "ClientSide",
+        "framework": "vite"
+      },
+      "serverside": {
+        "root": "ServerSide",
+        "framework": "express"
+      }
+    },
+    "rewrites": [
+      { "source": "/api/(.*)", "destination": { "service": "serverside" } },
+      { "source": "/(.*)", "destination": { "service": "clientside" } }
+    ]
+  }

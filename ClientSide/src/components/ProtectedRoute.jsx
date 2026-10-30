@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import useAuthStore from "../store/authStore";
+import { Sparkles } from "lucide-react";
 
 export default function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading, checkAuth, isInitialized } = useAuthStore();
@@ -12,11 +13,13 @@ export default function ProtectedRoute({ children }) {
     }
   }, [isInitialized, checkAuth]);
 
-  // Show loader only while the very first auth check runs
+  // ✅ Premium Loader (Without Text)
   if (isLoading && !isInitialized) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-[#00E5FF] text-lg">
-        Loading…
+      <div className="sketchflow-loader">
+        <div className="sketchflow-loader-box">
+          <Sparkles size={28} className="text-black" />
+        </div>
       </div>
     );
   }
